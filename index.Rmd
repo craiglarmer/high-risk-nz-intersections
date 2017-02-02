@@ -8,7 +8,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r sourcedata}
+The map below plots the most dangerous traffic intersections in New Zealand.  
+
+You can get more information on the data here: http://www.nzta.govt.nz/resources/high-risk-intersections-guide/
+
+Each marker includes details of associated injuries for each intersection.
+
+```{r sourcedata, echo=FALSE, message=FALSE}
 library(dplyr)
 library(leaflet)
 #get data
@@ -19,6 +25,12 @@ coordconvert <- read.csv("intersection-coord-conversion.csv")
 i <- nztaintersections %>% filter(Rank!="NA") %>% left_join(coordconvert)
 
 highrisk <- data.frame(lat = i$Latitude,lng = i$Longitude)
-mymap <- highrisk %>% leaflet() %>% addTiles() %>% addMarkers(clusterOptions = markerClusterOptions())
+
+i$popup <- paste(sep="","<b>",i$Crash.Road,", ",i$T.L.A...RCA.if.not.TLA.,"</b><br/>Intersection Rank: ",i$Rank,"<br/>Fatalaties:",i$Fatalities.2003.12,"<br/>Serious Injuries:",i$Serious.Injuries.2003.12,"<br/>Minor Injuries:",i$Minor.Injuries.2003.2012,"<br/>Total Injuries:",i$Total.Casualties.2003...2012,"<br/>")
+
+mymap <- highrisk %>% leaflet() %>% addTiles() %>% addMarkers(clusterOptions = markerClusterOptions(),popup=i$popup)
 mymap
 ```
+  
+<br/> 
+To convert the coordinates provided by NZTA to Latitude/Longitude I used the very handy Online Conversion tool from Land Information New Zealand, http://www.linz.govt.nz/data/geodetic-services/coordinate-conversion/online-conversions
